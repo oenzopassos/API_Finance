@@ -19,7 +19,7 @@ class UsersController {
             where: { email }
         })
 
-        if(userAlreadyExists) {
+        if (userAlreadyExists) {
             throw new AppError("User already exists")
         }
 
@@ -29,9 +29,53 @@ class UsersController {
             data: { name, email, password: hashedPassword }
         })
 
-        const {password: _, ...userWithoutPassowrd} = user
+        const { password: _, ...userWithoutPassowrd } = user
 
         return response.status(201).json(userWithoutPassowrd);
+    }
+
+
+    async update(request: Request, response: Response) {
+        const bodySchema = z.object({
+            name: z.string().min(3).optional(),
+            password: z.string().min(6).optional(),
+            old_password: z.string().min(6).optional()
+        })
+
+        const { name, password, old_password } = bodySchema.parse(request.body);
+
+        const user = await prisma.user.findUnique({
+            where: { id: request.user.id }
+        })
+
+        if (!user) {
+            throw new AppError("User not found", 404)
+        }
+
+        if (password && !old_password) {
+            throw new AppError("You need to inform the old password to set a new password")
+        }
+        if(password && old_password) {
+            const checkOldPassword = await hash(old_password, user.password);
+
+            if(!checkOldPassword) {
+                throw new AppError("Old password does not match")
+            }
+        }
+
+        const hashedPassword = password ? await hash(password, 8) : user.password;
+
+        const updatedUser = await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                name: name ?? user.name,
+                password: hashedPassword
+            },
+
+            select: {name: true, email: true, updatedAt: true}
+        })
+
+        return response.status(200).json(updatedUser);
     }
 
 
