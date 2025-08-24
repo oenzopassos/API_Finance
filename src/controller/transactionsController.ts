@@ -13,7 +13,7 @@ class TransactionsController {
             date: z.coerce.date().default(new Date())
         })
 
-        const { name, description, amount, category, type, date } = bodySchema.parse(request.body);
+        const {name, description, amount, category, type, date } = bodySchema.parse(request.body);
 
         const transaction = await prisma.transaction.create({
             data: {
@@ -24,8 +24,7 @@ class TransactionsController {
                 type,
                 date,
                 userId: request.user.id
-            },
-            select: { id: true, name: true, description: true, amount: true, category: true, type: true, date: true }
+            }
         })
 
         return response.status(201).json({
