@@ -70,12 +70,12 @@ class UsersController {
             data: {
                 name: name ?? user.name,
                 password: hashedPassword
-            },
-
-            select: {name: true, email: true, updatedAt: true}
+            }
         })
 
-        return response.status(200).json(updatedUser);
+        const { password: _, ...userWithoutPassword } = updatedUser;
+
+        return response.status(200).json(userWithoutPassword);
     }
 
 
