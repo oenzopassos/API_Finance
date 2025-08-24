@@ -10,5 +10,6 @@ transactionsRoutes.use(ensureAuthenticated)
 transactionsRoutes.post("/", transactionsController.create);
 transactionsRoutes.get("/", transactionsController.index);
 transactionsRoutes.put("/:id", transactionsController.update);
+transactionsRoutes.delete("/:id", transactionsController.delete);
 
 export { transactionsRoutes };

@@ -69,6 +69,16 @@ class TransactionsController {
         const { id } = paramsSchema.parse(request.params);
         const { name, description, amount, category, type, date } = bodySchema.parse(request.body);
 
+        const transaction = await prisma.transaction.findUnique({
+            where: { id }
+        })
+
+        if(!transaction) {
+            return response.status(400).json({
+                message: "Transaction not found"
+            })
+        }
+
         await prisma.transaction.update({
             where: { id },
             data: { name, description, amount, category, type, date }
@@ -76,6 +86,22 @@ class TransactionsController {
 
         return response.status(200).json({
             message: "Transaction updated successfully"
+        })
+    }
+
+    async delete(request: Request, response: Response) {
+        const paramsSchema = z.object({
+            id: z.uuid()
+        })
+
+        const {id} = paramsSchema.parse(request.params);
+
+        await prisma.transaction.delete({
+            where: {id}
+        })  
+
+        return response.status(200).json({
+            message: "Transaction deleted successfully"
         })
     }
 }
